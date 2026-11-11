@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ROOM No.9 · 凤猴版捡手机小游戏</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; }
+  body {
+    background:#08080d radial-gradient(1200px 800px at 50% -10%, #1b1b2e 0%, #08080d 60%);
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;
+    color:#eceaf4; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:14px 8px;
+  }
+  /* ---------- phone frame ---------- */
+  .phone {
+    position:relative; width:min(412px,100%); height:min(828px, calc(100vh - 28px)); min-height:560px;
+    background:linear-gradient(180deg,#14121f 0%, #0d0c16 100%);
+    border-radius:38px; border:1px solid #34304d;
+    box-shadow:0 0 0 6px #050508, 0 24px 70px rgba(0,0,0,.7), 0 0 90px rgba(94,72,180,.16) inset;
+    overflow:hidden; display:flex; flex-direction:column;
+  }
+  .statusbar {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 22px 4px; font-size:12.5px; color:#b9b4d6; letter-spacing:.4px; flex:0 0 auto; z-index:5;
+  }
+  .statusbar .owner { color:#8f88b8; font-size:11px; }
+  .screen { display:none; flex:1 1 auto; flex-direction:column; min-height:0; position:relative; }
+  .screen.active { display:flex; }
+  button { font-family:inherit; cursor:pointer; }
+  /* ---------- opening ---------- */
+  #screen-open { align-items:center; text-align:center; padding:26px 26px 30px; overflow-y:auto; }
+  .roomno { font-size:12px; letter-spacing:6px; color:#9a8fe0; margin-top:14px; }
+  .bigtitle { font-size:44px; font-weight:800; letter-spacing:2px; margin:6px 0 2px;
+    background:linear-gradient(92deg,#ffd9ec,#c9b8ff 55%,#9fe8ff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .subtitle { color:#b9b4d6; font-size:13.5px; line-height:1.7; }
+  .mascots { font-size:64px; margin:20px 0 4px; letter-spacing:8px; filter:drop-shadow(0 8px 18px rgba(0,0,0,.55)); }
+  .premise { background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.09); border-radius:16px;
+    padding:14px 16px; font-size:13.5px; line-height:1.85; color:#d9d5ee; text-align:left; margin-top:14px; }
+  .premise b { color:#ffd9ec; }
+  .disclaimer { margin-top:14px; font-size:11.5px; line-height:1.8; color:#8f88b8;
+    border:1px dashed rgba(160,150,220,.35); border-radius:12px; padding:9px 12px; }
+  .btn-main { margin-top:20px; background:linear-gradient(92deg,#ff7eb6,#8f7bff); color:#fff; border:none;
+    font-size:16.5px; font-weight:700; padding:13px 42px; border-radius:999px; letter-spacing:2px;
+    box-shadow:0 10px 26px rgba(160,90,220,.35); transition:transform .12s ease; }
+  .btn-main:active { transform:scale(.96); }
+  .hintline { margin-top:12px; font-size:11.5px; color:#6f6995; }
+  /* ---------- game HUD ---------- */
+  .hud { flex:0 0 auto; padding:8px 18px 10px; border-bottom:1px solid rgba(255,255,255,.06); }
+  .hud-top { display:flex; justify-content:space-between; align-items:center; }
+  .hud-title { font-size:12px; letter-spacing:3px; color:#9a8fe0; font-weight:700; }
+  .hud-task { font-size:12px; color:#b9b4d6; }
+  .btn-frags { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); color:#e8e4ff;
+    font-size:12px; padding:5px 12px; border-radius:999px; }
+  .bar-row { display:flex; align-items:center; gap:10px; margin-top:9px; }
+  .bar { flex:1; height:10px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; }
+  .bar-fill { height:100%; width:0%; border-radius:99px;
+    background:linear-gradient(90deg,#ff7eb6,#a58bff,#7ee0ff); transition:width .7s cubic-bezier(.22,1,.36,1); }
+  .pts { font-size:13px; font-weight:700; color:#ffd9ec; min-width:66px; text-align:right; }
+  .pts small { color:#8f88b8; font-weight:400; }
+  /* ---------- room stage ---------- */
+  .stage { flex:0 0 auto; padding:14px 18px 4px; text-align:center; }
+  .duo { font-size:52px; line-height:1.15; }
+  .duo .g, .duo .j { display:inline-block; transition:transform .8s cubic-bezier(.22,1,.36,1); }
+  .sofa { font-size:12px; color:#5f5982; letter-spacing:10px; margin-top:-4px; }
+  .lamp { font-size:11px; color:#6f6995; margin-top:5px; }
+  /* ---------- feed ---------- */
+  .feed { flex:1 1 auto; overflow-y:auto; padding:10px 16px 6px; display:flex; flex-direction:column; gap:8px; min-height:0;
+    scrollbar-width:thin; scrollbar-color:#3a3560 transparent; }
+  .msg { max-width:88%; padding:9px 13px; border-radius:15px; font-size:14px; line-height:1.65; animation:pop .25s ease; word-break:break-word; }
+  @keyframes pop { from { opacity:0; transform:translateY(6px);} to { opacity:1; transform:none;} }
+  .msg.sys { align-self:center; max-width:94%; background:rgba(20,18,36,.9); border:1px dashed rgba(154,143,224,.45);
+    color:#c9c2f2; font-size:13px; text-align:center; border-radius:12px; }
+  .msg.sys b { color:#ffd9ec; }
+  .msg.gin { align-self:flex-start; background:linear-gradient(135deg,#3b2d5e,#2c2350); border-bottom-left-radius:5px; }
+  .msg.jay { align-self:flex-end; background:linear-gradient(135deg,#5e2d47,#47223a); border-bottom-right-radius:5px; text-align:right; }
+  .who { display:block; font-size:10.5px; color:#a79fe0; margin-bottom:2px; letter-spacing:1px; }
+  .msg.jay .who { color:#e8a7c8; }
+  .msg.score { align-self:center; background:transparent; color:#ffd9ec; font-size:12.5px; padding:2px 6px; }
+  /* ---------- options ---------- */
+  .options { flex:0 0 auto; padding:10px 16px 18px; display:flex; flex-direction:column; gap:9px; }
+  .opt { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.13); color:#f0edff;
+    font-size:14.5px; padding:12px 16px; border-radius:14px; text-align:left; transition:all .12s ease; line-height:1.5; }
+  .opt:hover { background:rgba(255,255,255,.11); border-color:rgba(255,217,236,.5); }
+  .opt:active { transform:scale(.98); }
+  .opt.bonusopt { border-color:rgba(255,190,90,.55); background:rgba(255,170,60,.08); }
+  /* ---------- modal ---------- */
+  .modal { position:absolute; inset:0; background:rgba(5,4,12,.72); backdrop-filter:blur(3px);
+    display:none; align-items:center; justify-content:center; padding:22px; z-index:20; }
+  .modal.show { display:flex; }
+  .card { background:linear-gradient(180deg,#1d1a30,#151322); border:1px solid rgba(255,255,255,.14);
+    border-radius:20px; padding:20px 18px; width:100%; max-height:88%; overflow-y:auto; animation:pop .3s ease; }
+  .card h3 { font-size:16px; margin-bottom:8px; letter-spacing:1px; }
+  .card .sysline { color:#c9c2f2; font-size:13.5px; line-height:1.8; background:rgba(20,18,36,.85);
+    border:1px dashed rgba(154,143,224,.4); border-radius:12px; padding:10px 12px; margin-bottom:12px; }
+  .card .opt { width:100%; margin-top:8px; }
+  .bonus-tag { display:inline-block; background:linear-gradient(92deg,#ffb84d,#ff7eb6); color:#241126;
+    font-size:11px; font-weight:800; padding:3px 10px; border-radius:99px; letter-spacing:2px; margin-bottom:10px; }
+  .frag-tag { display:inline-block; background:rgba(126,224,255,.16); border:1px solid rgba(126,224,255,.4); color:#aee9ff;
+    font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; letter-spacing:2px; margin-bottom:10px; }
+  /* LINE-style fragment */
+  .linechat { background:#0f1420; border-radius:14px; padding:12px; display:flex; flex-direction:column; gap:7px; margin-bottom:12px; }
+  .bubble { max-width:82%; font-size:13.5px; line-height:1.6; padding:7px 11px; border-radius:13px; }
+  .bubble.l { align-self:flex-start; background:#232c42; border-bottom-left-radius:4px; }
+  .bubble.r { align-self:flex-end; background:#3f6b4f; border-bottom-right-radius:4px; }
+  .bubble .nm { display:block; font-size:10px; opacity:.65; margin-bottom:1px; }
+  .albumcard { background:linear-gradient(150deg,#2a2444,#1a1830); border-radius:14px; padding:16px 12px; text-align:center; margin-bottom:12px; }
+  .albumcard .pic { font-size:52px; margin-bottom:8px; }
+  .albumcard .cap { font-size:13px; color:#d9d5ee; line-height:1.7; }
+  .albumcard .date { font-size:11px; color:#8f88b8; margin-top:5px; }
+  .btn-sub { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); color:#eeeaff;
+    font-size:14px; padding:11px 18px; border-radius:12px; width:100%; margin-top:6px; }
+  /* ---------- collection ---------- */
+  .fragitem { border:1px solid rgba(255,255,255,.1); border-radius:14px; padding:11px 13px; margin-bottom:9px; background:rgba(255,255,255,.03); }
+  .fragitem .ft { font-size:13px; font-weight:700; color:#ffd9ec; margin-bottom:3px; }
+  .fragitem .fb { font-size:12.5px; color:#c9c5e8; line-height:1.65; white-space:pre-line; }
+  .fragitem.locked { opacity:.45; }
+  .fragitem.locked .ft { color:#8f88b8; }
+  /* ---------- ending ---------- */
+  #screen-end { align-items:center; padding:24px 22px 28px; overflow-y:auto; text-align:center; }
+  .end-emoji { font-size:56px; margin:8px 0 6px; }
+  .end-name { font-size:25px; font-weight:800; letter-spacing:1px; margin-bottom:8px;
+    background:linear-gradient(92deg,#ffd9ec,#c9b8ff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .end-text { font-size:13.5px; line-height:1.9; color:#d9d5ee; max-width:330px; }
+  .scorecard { margin-top:20px; width:100%; max-width:300px; aspect-ratio:3/4.1; border-radius:22px; padding:22px 18px;
+    background:linear-gradient(165deg,#241f42 0%, #171430 55%, #2c1836 100%);
+    border:1.5px solid transparent; background-clip:padding-box; position:relative;
+    box-shadow:0 18px 44px rgba(0,0,0,.5); display:flex; flex-direction:column; align-items:center; }
+  .scorecard::before { content:""; position:absolute; inset:-1.5px; border-radius:22px; z-index:-1;
+    background:linear-gradient(160deg,#ff7eb6,#8f7bff,#7ee0ff); }
+  .scorecard .sc-room { font-size:11px; letter-spacing:5px; color:#9a8fe0; }
+  .scorecard .sc-mascot { font-size:40px; margin:8px 0 2px; }
+  .scorecard .sc-end { font-size:21px; font-weight:800; line-height:1.4; margin:4px 8px 10px; }
+  .scorecard .sc-row { display:flex; justify-content:space-between; width:100%; padding:7px 4px;
+    border-top:1px solid rgba(255,255,255,.1); font-size:13.5px; color:#c9c5e8; }
+  .scorecard .sc-row b { color:#fff; font-size:15px; }
+  .scorecard .sc-grade { font-size:30px; font-weight:900; color:#ffd9ec; }
+  .scorecard .sc-verdict { margin-top:auto; font-size:12.5px; line-height:1.75; color:#e8e2ff;
+    background:rgba(255,255,255,.06); border-radius:12px; padding:9px 12px; width:100%; }
+  .scorecard .sc-foot { margin-top:10px; font-size:10px; color:#8f88b8; letter-spacing:1px; }
+  #autotest-result { display:none; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <div class="statusbar">
+    <span id="clock">21:47</span>
+    <span class="owner">📱 Ginny 的手机</span>
+    <span>5G ▂▄▆ 🔋</span>
+  </div>
+
+  <!-- ======== OPENING ======== -->
+  <section class="screen active" id="screen-open">
+    <div class="roomno">R O O M&nbsp;&nbsp;N o . 9</div>
+    <div class="bigtitle">9 号房间</div>
+    <div class="subtitle">凤猴版 · 捡手机小游戏</div>
+    <div class="mascots">🦙🐒</div>
+    <div class="premise">
+      你捡到了 <b>Ginny</b> 的手机。<br>
+      手机里正运行着一个来历不明的程序——<b>「ROOM No.9」</b>：她和 <b>Jayna</b> 被锁在 9 号房间，房间屏幕会发布亲密任务。完成得点，<b>集满 100 点，门就开</b>。<br>
+      接下来每一个选择，都由你替她们做。
+    </div>
+    <div class="disclaimer">⚠️ 粉丝同人虚构小游戏：人物、情节、对话均为虚构，与真人无关。</div>
+    <button class="btn-main" id="btn-start">开始游戏</button>
+    <div class="hintline">一局约 5–10 分钟 · 共 10 个任务 · 结局有 4 种</div>
+  </section>
+
+  <!-- ======== GAME ======== -->
+  <section class="screen" id="screen-game">
+    <div class="hud">
+      <div class="hud-top">
+        <span class="hud-title">ROOM No.9</span>
+        <span class="hud-task" id="hud-task">任务 0 / 10</span>
+        <button class="btn-frags" id="btn-frags">📱 碎片 <span id="frag-count">0/10</span></button>
+      </div>
+      <div class="bar-row">
+        <div class="bar"><div class="bar-fill" id="bar-fill"></div></div>
+        <div class="pts"><span id="pts-num">0</span> <small>/ 100 点</small></div>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="duo"><span class="g" id="duo-g">🦙</span><span class="j" id="duo-j">🐒</span></div>
+      <div class="sofa">🛋️</div>
+      <div class="lamp" id="lamp">房间灯光：亮 · 门：锁着</div>
+    </div>
+    <div class="feed" id="feed"></div>
+    <div class="options" id="options"></div>
+  </section>
+
+  <!-- ======== ENDING ======== -->
+  <section class="screen" id="screen-end">
+    <div class="roomno">R O O M&nbsp;&nbsp;N o . 9 · 结算</div>
+    <div class="end-emoji" id="end-emoji">🚪</div>
+    <div class="end-name" id="end-name">结局</div>
+    <div class="end-text" id="end-text"></div>
+    <div class="scorecard" id="scorecard">
+      <div class="sc-room">ROOM No.9 · 战绩卡</div>
+      <div class="sc-mascot">🦙🐒</div>
+      <div class="sc-end" id="sc-end">结局名</div>
+      <div class="sc-row"><span>开门点数</span><b id="sc-points">0 点</b></div>
+      <div class="sc-row"><span>默契评级</span><span class="sc-grade" id="sc-grade">S</span></div>
+      <div class="sc-row"><span>触发加试</span><b id="sc-bonus">0 次</b></div>
+      <div class="sc-row"><span>收集碎片</span><b id="sc-frags">0 / 10</b></div>
+      <div class="sc-verdict" id="sc-verdict"></div>
+      <div class="sc-foot">凤猴版捡手机小游戏 · 同人虚构，与真人无关</div>
+    </div>
+    <button class="btn-main" id="btn-restart">再来一局</button>
+    <div class="hintline">📸 战绩卡可以截图，晒到评论区挑战朋友</div>
+  </section>
+
+  <!-- bonus modal -->
+  <div class="modal" id="modal-bonus">
+    <div class="card">
+      <span class="bonus-tag">⚡ 系统加试</span>
+      <h3 id="bonus-title">加试</h3>
+      <div class="sysline" id="bonus-sys"></div>
+      <div id="bonus-options"></div>
+    </div>
+  </div>
+
+  <!-- fragment modal -->
+  <div class="modal" id="modal-frag">
+    <div class="card">
+      <span class="frag-tag">📱 手机碎片解锁</span>
+      <h3 id="frag-title">碎片</h3>
+      <div id="frag-body"></div>
+      <button class="btn-sub" id="btn-frag-next">收下碎片，继续</button>
+    </div>
+  </div>
+
+  <!-- collection modal -->
+  <div class="modal" id="modal-coll">
+    <div class="card">
+      <h3>📱 手机碎片图鉴</h3>
+      <div id="coll-list"></div>
+      <button class="btn-sub" id="btn-coll-close">关闭</button>
+    </div>
+  </div>
+</div>
+<script>
+"use strict";
+/* ================= DATA ================= */
+const SYS = (t)=>({who:"sys", text:t});
+const GIN = (t)=>({who:"gin", name:"🦙 Ginny", text:t});
+const JAY = (t)=>({who:"jay", name:"🐒 Jayna", text:t});
+const SCORE = (t)=>({who:"score", text:t});
+
+const TASKS = [
+{ n:1, title:"牵手 10 秒",
+  sys:"任务 01：请两位牵手，持续 10 秒。……检测中。",
+  options:[
+   { t:"不用牵——她们进门时就牵着", chem:2, bonus:"b1",
+     lines:[SYS("……检测完毕。任务在开始前，已经完成了。"),SYS("这间房的样本，不太对劲。"),GIN("嘿嘿 :3"),JAY("🤍")] },
+   { t:"松开，重新认真牵一次", chem:1,
+     lines:[SYS("……松开了。又牵上了。行吧，算完成。"),GIN("那我牵紧一点 (´▽`)"),JAY("🤏🏼")] },
+   { t:"先松开，假装不熟", chem:-1, pts:5, shy:true,
+     lines:[SYS("……松开了。三秒。……又牵回去了。"),SYS("判定：口是心非。本任务只给一半分。"),JAY("👀")] },
+  ]},
+{ n:2, title:"对视 10 秒，不许笑",
+  sys:"任务 02：对视 10 秒。不许笑。笑的人重做。",
+  options:[
+   { t:"Jayna 第 3 秒就笑场", chem:1,
+     lines:[JAY("🤣🤣🤣"),SYS("重做。"),GIN("她笑点真的很低……"),SYS("第二次。……通过。看在重做很认真的份上。")] },
+   { t:"Ginny 先破功", chem:1,
+     lines:[GIN("不行，她一看我我就想笑 >_<"),JAY("😏"),SYS("重做一次。……通过。下次管好表情。")] },
+   { t:"两人都憋住了，眼神拉丝", chem:2,
+     lines:[SYS("10 秒到。没人笑。"),SYS("……这个房间的空调是不是坏了。有点热。"),JAY("🫣")] },
+  ]},
+{ n:3, title:"喂对方吃一口东西",
+  sys:"任务 03：房间准备了小布丁。请喂对方吃一口。",
+  options:[
+   { t:"Ginny 喂 Jayna", chem:1,
+     lines:[GIN("啊——张嘴 :3"),JAY("😋"),SYS("完成。勺子差点被一起吃掉。")] },
+   { t:"Jayna 喂 Ginny", chem:1,
+     lines:[JAY("🍮➡️🦙"),GIN("唔，好吃 (´▽`)"),SYS("完成。被喂的人看起来想续杯。")] },
+   { t:"互相喂", chem:2, bonus:"b3",
+     lines:[SYS("……同时伸手。同时张嘴。同时愣住。"),SYS("判定：过于熟练。这种配合不是练出来的。"),JAY("🤭")] },
+  ]},
+{ n:4, title:"抱抱充电 30 秒",
+  sys:"任务 04：抱抱充电，30 秒。计时开始。",
+  options:[
+   { t:"普通抱一下", chem:1,
+     lines:[SYS("……30 秒到。可以松开了。"),SYS("……我说，可以松开了。"),GIN("再充一会儿嘛")] },
+   { t:"抱紧一点，认真充", chem:2,
+     lines:[SYS("心率同步中。……同步完成。"),JAY("🔋✨"),GIN("满格了 :3")] },
+   { t:"抱着转一圈", chem:2, bonus:"b4",
+     lines:[JAY("😆😆"),SYS("……转一圈是自愿加的。判定：过于熟练。"),GIN("好玩！再转一圈！")] },
+  ]},
+{ n:5, title:"帮对方整理头发",
+  sys:"任务 05：帮对方整理头发。慢一点，这个任务不赶时间。",
+  options:[
+   { t:"Ginny 帮 Jayna 理", chem:1,
+     lines:[GIN("别动，这里翘起来了"),JAY("🤍"),SYS("……理了 2 分钟。头发只有一根翘的。")] },
+   { t:"Jayna 帮 Ginny 理", chem:1,
+     lines:[JAY("🪮✨"),GIN("嘿嘿，舒服 :3"),SYS("被理的人快要睡着了。注意场合。")] },
+   { t:"互相理，理了很久", chem:2,
+     lines:[SYS("计时器响了三次，她们没听见。"),SYS("算了。这个任务，按完成处理。"),JAY("🫠")] },
+  ]},
+{ n:6, title:"说一句真心夸奖",
+  sys:"任务 06：对对方说一句真心夸奖。一句就够。",
+  options:[
+   { t:"夸外貌", chem:1,
+     lines:[GIN("今天也好看。特别好看。"),JAY("🤏🏼🤍"),SYS("收到。对方耳朵红了。任务完成。")] },
+   { t:"夸演技", chem:1,
+     lines:[GIN("你演哭戏的时候，我在监视器后面也哭了"),JAY("🥺"),SYS("……真心判定：真。完成。")] },
+   { t:"Ginny 一开口，停不下来", chem:2, bonus:"b6",
+     lines:[GIN("眼睛好看，笑起来好看，认真的时候好看，生气也可爱，还有——"),SYS("三分钟了。"),GIN("我还没说完 (´▽`)"),SYS("判定：过于熟练。且不像第一次说。")] },
+  ]},
+{ n:7, title:"合拍一张自拍",
+  sys:"任务 07：合拍一张自拍。存进相册，就算完成。",
+  options:[
+   { t:"搞怪脸", chem:1,
+     lines:[JAY("😜📸"),GIN("哈哈哈哈这张不能发"),SYS("已存入相册。……删不掉的那种存法。")] },
+   { t:"贴贴脸", chem:2,
+     lines:[SYS("构图检测：两张脸之间的距离，0.4 厘米。"),GIN("这张好 :3"),JAY("💌")] },
+   { t:"连拍九宫格，选不出来", chem:2,
+     lines:[SYS("连拍 27 张。一张都不舍得删。"),SYS("……相册容量告警。算完成。"),GIN("都好看，没办法 (´▽`)")] },
+  ]},
+{ n:8, title:"用昵称喊对方",
+  sys:"任务 08：用你们平时最常用的昵称，喊对方一声。",
+  options:[
+   { t:"Ginny 先喊：「my🐒」", chem:2,
+     lines:[GIN("my🐒 ~"),JAY("🤍🤍"),SYS("……资料库比对：这个称呼有公开记录。本人认证，完成。")] },
+   { t:"Jayna 先喊：「พี่จิน」", chem:2,
+     lines:[JAY("พี่จินนนน"),GIN("ว่าไง (´▽`)"),SYS("尾音拖了四秒。……完成。")] },
+   { t:"两个人一起喊，喊完自己先害羞", chem:1,
+     lines:[GIN("my🐒 !"),JAY("พี่จิน !"),SYS("……同步率 100%。然后两个人一起低头。行吧，完成。")] },
+  ]},
+{ n:9, title:"额头抵额头，量一次「体温」",
+  sys:"任务 09：额头抵额头，量一次体温。……本房间没有体温计，就这么量。",
+  options:[
+   { t:"认真量，报数", chem:2,
+     lines:[GIN("36.5 度。健康 :3"),SYS("测量方式不科学。结果……采纳。"),JAY("🤍")] },
+   { t:"量完顺便蹭一下", chem:2,
+     lines:[SYS("检测到额外动作。"),SYS("……不扣分。"),JAY("🫣")] },
+   { t:"隔着一点空气量", chem:-1, pts:5, shy:true,
+     lines:[SYS("额头抵额头。空气，不算额头。"),SYS("判定：太怂。本任务只给一半分。"),GIN("那……那靠近一点点")] },
+  ]},
+{ n:10, title:"终局任务：脸颊亲亲",
+  sys:"终局任务：脸颊亲亲。完成后，总点数结算，门开。",
+  options:[
+   { t:"Ginny 亲 Jayna", chem:2,
+     lines:[GIN("那我来了哦 :3"),JAY("🤏🏼🤍"),SYS("……记录完毕。脸红的那种记录。")] },
+   { t:"Jayna 亲 Ginny", chem:2,
+     lines:[JAY("💋"),GIN("！！ (´▽`*)"),SYS("被亲的人宕机三秒。……正常现象。")] },
+   { t:"两个人同时", chem:2, bonus:"b10",
+     lines:[SYS("……同时。撞到鼻子了。"),JAY("🤣"),GIN("重来重来，这次慢慢来"),SYS("判定：过于熟练。门都开了还重来。")] },
+   { t:"先深呼吸三次再说", chem:0, pts:5, shy:true,
+     lines:[SYS("一次。两次。三次。"),SYS("……亲是亲了。磨蹭，扣一半分。"),JAY("😏")] },
+  ]},
+];
+
+const BONUS = {
+ b1:{ title:"加试：牵手散步", sys:"加试：牵着手，在房间里走一圈。不许松。走完 +5 点。",
+   options:[
+    { t:"走完，还多走了半圈", chem:1, lines:[SYS("……多走的半圈，算赠送。本系统不收。"),GIN("房间太小了嘛 :3")] },
+    { t:"慢慢走，正好一圈", chem:0, lines:[SYS("一圈。松手。……她们没松。算了，加试通过。")] },
+   ]},
+ b3:{ title:"加试：闭眼喂第二口", sys:"加试：再喂一口。这次，喂的人闭眼。成功 +5 点。",
+   options:[
+    { t:"一口到位，稳准狠", chem:1, lines:[SYS("闭眼喂食，命中率 100%。"),SYS("……这不合理。加试通过。"),JAY("😎")] },
+    { t:"喂到鼻子上了", chem:0, lines:[JAY("🤣🤣"),GIN("对不起对不起 (´▽`)"),SYS("笑场归笑场。加试，通过。")] },
+   ]},
+ b4:{ title:"加试：再抱 30 秒", sys:"加试：再抱 30 秒。这次不许提前松手。满 30 秒 +5 点。",
+   options:[
+    { t:"抱满，还超时了", chem:1, lines:[SYS("40 秒了。"),SYS("……超时部分不另收费。加试通过。"),GIN("嘿嘿")] },
+    { t:"老老实实抱满 30 秒", chem:0, lines:[SYS("30 秒整。松手速度：极慢。"),SYS("加试通过。")] },
+   ]},
+ b6:{ title:"加试：换 Jayna 夸回来", sys:"加试：换 Jayna 夸一句回来。就一句。说完 +5 点。",
+   options:[
+    { t:"Jayna 憋出了一句完整的", chem:1, lines:[JAY("……พี่จินเก่งที่สุด。"),SYS("检测到长句。破例。加试通过。"),GIN("录下来了，我要当铃声 (´▽`*)")] },
+    { t:"Jayna 发了一串 emoji 代替", chem:0, lines:[JAY("✨🦙✨🤍🤍🤍"),SYS("……翻译中。翻译失败。"),SYS("但诚意收到。加试通过。")] },
+   ]},
+ b10:{ title:"加试：门开之后的加试", sys:"门已经开了。……加试：再亲一次。这次不许笑场。+5 点。",
+   options:[
+    { t:"亲了，没笑", chem:1, lines:[GIN("过关！:3"),SYS("……本系统正式宣布：对这组样本没有办法。")] },
+    { t:"Jayna 还是笑了", chem:0, lines:[JAY("🤣💋"),SYS("带笑的亲亲。……也算。加试通过。")] },
+   ]},
+};
+
+const FRAGS = [
+ { type:"line", title:"碎片 01 · LINE · 今天早上",
+   msgs:[["r","Jayna 🐒","📍"],["l","Ginny 🦙","ถึงแล้ววว :3"],["l","Ginny 🦙","到了到了，别担心"]] },
+ { type:"line", title:"碎片 02 · LINE · 凌晨",
+   msgs:[["l","Ginny 🦙","No sleep,"],["l","Ginny 🦙","睡不着 (´･ω･`)̄"],["r","Jayna 🐒","🛌💤➡️🦙"],["l","Ginny 🦙","……这是让我去睡的意思吗"],["r","Jayna 🐒","👍"]] },
+ { type:"album", title:"碎片 03 · 相册 · 试衣间外", pic:"🪞👗📸", cap:"自拍一张。镜子里的人只拍了半张脸，另一半心思全在衣架那边。", date:"今天 · 上午" },
+ { type:"line", title:"碎片 04 · LINE · 日常",
+   msgs:[["r","Jayna 🐒","🤗"],["l","Ginny 🦙","收到，抱抱已签收 ☺️"],["r","Jayna 🐒","🤗🤗🤗"],["l","Ginny 🦙","好好好，加量了加量了 :3"]] },
+ { type:"album", title:"碎片 05 · 相册 · 红毯", pic:"👗✨👗", cap:"成套的礼服，牵着手的合照。她配文只写了一句：my🐒。", date:"颁奖礼 · 当晚" },
+ { type:"line", title:"碎片 06 · LINE · 夸夸专线",
+   msgs:[["l","Ginny 🦙","วันนี้สวยมาก"],["l","Ginny 🦙","今天特别好看，我说真的"],["r","Jayna 🐒","🤏🏼🤍"]] },
+ { type:"album", title:"碎片 07 · 相册 · 刚刚", pic:"🤳💕", cap:"任务 07 存进来的那张贴贴脸自拍。系统说删不掉——其实谁也没想删。", date:"刚刚 · 9 号房间" },
+ { type:"line", title:"碎片 08 · LINE · 称呼",
+   msgs:[["r","Jayna 🐒","พี่จินนนน"],["l","Ginny 🦙","ว่าไง my🐒"],["r","Jayna 🐒","🤍"]] },
+ { type:"album", title:"碎片 09 · 相册 · 动物园", pic:"🦒🐒📷", cap:"动物园直播那天的合照。某只猴子本猴出镜，另一只负责拍照。", date:"直播 · 当天" },
+ { type:"line", title:"碎片 10 · LINE · 晚上见",
+   msgs:[["l","Ginny 🦙","See you tonight na 💌"],["r","Jayna 🐒","🤍"],["l","Ginny 🦙","有惊喜。先不说。:3"]] },
+];
+
+const ENDINGS = {
+ perfect:{ emoji:"🚪💕", name:"牵手出门 · 完美结局",
+   text:"点数到账，门开了。两个人牵着手走出来，跟进门时一模一样——哦，不对，进门时也是牵着的。Jayna 回头，对着房间的摄像头（也就是你）比了个 🤏🏼🤍。这是她式的、极简的感谢。",
+   verdict:"系统评语：样本过于般配，建议直接放行。——系统 留" },
+ normal:{ emoji:"🚪✨", name:"普通出门",
+   text:"门开了。Ginny 走之前回头，对着屏幕说了句「:3」。不多不少，刚刚好。门在她们身后关上，9 号房间恢复安静——就是椅子好像被人坐热了。",
+   verdict:"系统评语：门是开了。感情的事，她们自己会办。——系统 留" },
+ annexed:{ emoji:"🛋️🏠", name:"房间被征用 · 喜剧结局",
+   text:"加试触发太多次，系统重新评估了这组样本。结论：「样本拒绝离开。」门自己打开了，没人理它。两个人赖在沙发上，点起了第二轮任务——自己给自己发的。9 号房间，即日起转为她们的休息室。",
+   verdict:"系统评语：本系统认输。9 号房间，归她们了。——系统 留" },
+ sleep:{ emoji:"💤🌙", name:"睡着了 · 温馨结局",
+   text:"点数没有凑满，倒计时走到了最后。镜头里，两个人靠在一起，睡着了。系统沉默了很久，把房间的灯光调到最暗，只留下一行字：「任务暂停。别吵醒她们。」",
+   verdict:"系统评语：点数不够也没关系。她们靠在一起的时候，不需要点数。——系统 留" },
+};
+</script>
+<script>
+"use strict";
+/* ================= STATE & HELPERS ================= */
+const $ = (s)=>document.querySelector(s);
+const state = { points:0, chem:0, bonusCount:0, taskIdx:0, frags:[], noted:false, over:false };
+window.__endKey = null;
+const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+
+function tickClock(){
+  const d = new Date();
+  $("#clock").textContent = String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+}
+tickClock(); setInterval(tickClock, 20000);
+
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  $(id).classList.add("active");
+}
+function updateHUD(){
+  $("#hud-task").textContent = "任务 " + Math.min(state.taskIdx+1,10) + " / 10";
+  $("#pts-num").textContent = state.points;
+  $("#bar-fill").style.width = Math.min(state.points,100) + "%";
+  const got = state.frags.filter(Boolean).length;
+  $("#frag-count").textContent = got + "/10";
+  const left = Math.max(0, 100 - state.points);
+  $("#lamp").textContent = left > 0 ? ("房间灯光：亮 · 门：还差 " + left + " 点") : "房间灯光：亮 · 门：点数已满";
+  const spread = Math.min(30, state.points * 0.30);
+  $("#duo-g").style.transform = "translateX(" + spread + "px)";
+  $("#duo-j").style.transform = "translateX(-" + spread + "px)";
+}
+function pushMsg(m){
+  const feed = $("#feed");
+  const div = document.createElement("div");
+  if (m.who === "sys"){ div.className = "msg sys"; div.innerHTML = m.text; }
+  else if (m.who === "score"){ div.className = "msg score"; div.textContent = m.text; }
+  else { div.className = "msg " + m.who; div.innerHTML = '<span class="who">'+m.name+'</span>' + m.text; }
+  feed.appendChild(div);
+  feed.scrollTop = feed.scrollHeight;
+}
+async function pushLines(lines){
+  for (const l of lines){ pushMsg(l); await sleep(430); }
+}
+function clearOptions(){ $("#options").innerHTML = ""; }
+function renderOptions(container, options, onPick){
+  container.innerHTML = "";
+  options.forEach((o,i)=>{
+    const b = document.createElement("button");
+    b.className = "opt" + (o.bonus ? " bonusopt" : "");
+    b.textContent = o.t;
+    b.dataset.idx = i; b.dataset.chem = o.chem; b.dataset.pts = (o.pts ?? 10);
+    if (o.bonus) b.dataset.bonus = o.bonus;
+    if (o.shy) b.dataset.shy = "1";
+    b.addEventListener("click", ()=>onPick(o));
+    container.appendChild(b);
+  });
+}
+
+/* ================= GAME FLOW ================= */
+function resetState(){
+  state.points = 0; state.chem = 0; state.bonusCount = 0; state.taskIdx = 0;
+  state.frags = new Array(FRAGS.length).fill(false); state.noted = false; state.over = false;
+  window.__endKey = null;
+  $("#feed").innerHTML = "";
+}
+async function startGame(){
+  resetState();
+  show("#screen-game");
+  updateHUD();
+  await pushLines([
+    SYS("信号接入中。这里是 <b>ROOM No.9</b> 的房间屏幕。"),
+    SYS("门锁状态：已锁。开门条件：完成全部 10 个任务，集满 <b>100 点</b>。"),
+    GIN("……这个房间，到底是怎么回事 :3"),
+    JAY("👀"),
+    SYS("样本已就位。开始发布任务。"),
+  ]);
+  renderTask();
+}
+function renderTask(){
+  const task = TASKS[state.taskIdx];
+  updateHUD();
+  pushMsg(SYS("<b>任务 " + String(task.n).padStart(2,"0") + " · " + task.title + "</b><br>" + task.sys));
+  renderOptions($("#options"), task.options, (o)=>chooseOption(task, o));
+}
+async function chooseOption(task, opt){
+  clearOptions();
+  const pts = opt.pts ?? 10;
+  state.points += pts; state.chem += opt.chem;
+  await pushLines(opt.lines);
+  pushMsg(SCORE("✦ +" + pts + " 点" + (opt.chem ? " · 默契 " + (opt.chem > 0 ? "+" : "") + opt.chem : "")));
+  updateHUD();
+  if (state.points >= 100 && state.taskIdx < 9 && !state.noted){
+    state.noted = true;
+    await pushLines([SYS("点数已满。……但任务没做完，门不开。别想偷懒。")]);
+  }
+  if (opt.bonus){ openBonus(opt.bonus); }
+  else { unlockFragment(); }
+}
+function openBonus(key){
+  const b = BONUS[key];
+  $("#bonus-title").textContent = b.title;
+  $("#bonus-sys").textContent = b.sys;
+  renderOptions($("#bonus-options"), b.options, async (o)=>{
+    $("#modal-bonus").classList.remove("show");
+    state.points += 5; state.bonusCount += 1; state.chem += o.chem;
+    await pushLines(o.lines);
+    pushMsg(SCORE("⚡ 加试通过 · +5 点" + (o.chem ? " · 默契 +" + o.chem : "")));
+    updateHUD();
+    unlockFragment();
+  });
+  $("#modal-bonus").classList.add("show");
+}
+function fragBodyHTML(f){
+  if (f.type === "line"){
+    let h = '<div class="linechat">';
+    for (const [side, nm, tx] of f.msgs){
+      const isJayna = nm.indexOf("Jayna") >= 0;
+      h += '<div class="bubble ' + (isJayna ? "l" : "r") + '"><span class="nm">' + nm + "</span>" + tx + "</div>";
+    }
+    return h + "</div>";
+  }
+  return '<div class="albumcard"><div class="pic">' + f.pic + '</div><div class="cap">' + f.cap + '</div><div class="date">' + f.date + "</div></div>";
+}
+function unlockFragment(){
+  const i = state.taskIdx;
+  state.frags[i] = true;
+  const f = FRAGS[i];
+  $("#frag-title").textContent = f.title;
+  $("#frag-body").innerHTML = fragBodyHTML(f);
+  $("#btn-frag-next").textContent = (i >= 9) ? "收下碎片，看结局 🚪" : "收下碎片，继续";
+  updateHUD();
+  $("#modal-frag").classList.add("show");
+}
+async function nextStep(){
+  $("#modal-frag").classList.remove("show");
+  state.taskIdx += 1;
+  if (state.taskIdx >= TASKS.length){ showEnding(); return; }
+  await sleep(250);
+  renderTask();
+}
+function gradeOf(chem){ return chem >= 17 ? "S" : chem >= 15 ? "A" : chem >= 8 ? "B" : "C"; }
+function pickEnding(){
+  if (state.points < 100) return "sleep";
+  if (state.bonusCount >= 3) return "annexed";
+  if (state.chem >= 15) return "perfect";
+  return "normal";
+}
+function showEnding(){
+  state.over = true;
+  const key = pickEnding();
+  window.__endKey = key;
+  const e = ENDINGS[key];
+  $("#end-emoji").textContent = e.emoji;
+  $("#end-name").textContent = e.name;
+  $("#end-text").textContent = e.text;
+  $("#sc-end").textContent = e.name;
+  $("#sc-points").textContent = state.points + " 点";
+  $("#sc-grade").textContent = gradeOf(state.chem) + "（" + state.chem + "）";
+  $("#sc-bonus").textContent = state.bonusCount + " 次";
+  $("#sc-frags").textContent = state.frags.filter(Boolean).length + " / 10";
+  $("#sc-verdict").textContent = e.verdict;
+  show("#screen-end");
+}
+/* ================= COLLECTION ================= */
+function fragSummary(f){
+  if (f.type === "album") return f.cap;
+  return f.msgs.map(m=>m[1] + "：" + m[2]).join("\n");
+}
+function renderCollection(){
+  const list = $("#coll-list");
+  list.innerHTML = "";
+  FRAGS.forEach((f,i)=>{
+    const d = document.createElement("div");
+    if (state.frags[i]){
+      d.className = "fragitem";
+      d.innerHTML = '<div class="ft">' + f.title + '</div><div class="fb"></div>';
+      d.querySelector(".fb").textContent = fragSummary(f);
+    } else {
+      d.className = "fragitem locked";
+      d.innerHTML = '<div class="ft">碎片 ' + String(i+1).padStart(2,"0") + ' · ？？？</div><div class="fb">完成任务 ' + (i+1) + ' 后解锁</div>';
+    }
+    list.appendChild(d);
+  });
+}
+/* ================= WIRING ================= */
+$("#btn-start").addEventListener("click", startGame);
+$("#btn-restart").addEventListener("click", startGame);
+$("#btn-frag-next").addEventListener("click", nextStep);
+$("#btn-frags").addEventListener("click", ()=>{ renderCollection(); $("#modal-coll").classList.add("show"); });
+$("#btn-coll-close").addEventListener("click", ()=>$("#modal-coll").classList.remove("show"));
+
+/* ================= AUTOTEST (verification hook: ?autotest=perfect|plain|bonus|shy) ================= */
+(function(){
+  const strat = new URLSearchParams(location.search).get("autotest");
+  if (!strat) return;
+  const pickFrom = (btns)=>{
+    const arr = [...btns];
+    if (!arr.length) return null;
+    const shy = arr.find(b=>b.dataset.shy);
+    const bonus = arr.find(b=>b.dataset.bonus);
+    const byChem = [...arr].sort((a,b)=>Number(b.dataset.chem)-Number(a.dataset.chem));
+    if (strat === "shy") return shy || arr[0];
+    if (strat === "bonus") return bonus || arr[0];
+    if (strat === "plain") return arr.find(b=>!b.dataset.bonus && !b.dataset.shy) || arr[0];
+    /* perfect: best chemistry without triggering bonus */
+    return byChem.find(b=>!b.dataset.bonus) || arr[0];
+  };
+  const timer = setInterval(()=>{
+    if (state.over){
+      clearInterval(timer);
+      const r = "AUTOTEST " + strat + " ENDING=" + window.__endKey + " POINTS=" + state.points + " CHEM=" + state.chem + " BONUS=" + state.bonusCount + " FRAGS=" + state.frags.filter(Boolean).length;
+      const d = document.createElement("div"); d.id = "autotest-result"; d.textContent = r;
+      document.body.appendChild(d); document.title = r;
+      return;
+    }
+    if ($("#modal-frag").classList.contains("show")){ $("#btn-frag-next").click(); return; }
+    if ($("#modal-bonus").classList.contains("show")){
+      const b = $("#bonus-options").querySelector(".opt"); if (b) b.click(); return;
+    }
+    if ($("#screen-open").classList.contains("active")){ $("#btn-start").click(); return; }
+    const b = pickFrom($("#options").querySelectorAll(".opt"));
+    if (b) b.click();
+  }, 160);
+})();
+</script>
+</body>
+</html>
