@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>磕学八维测试 v3</title>
+<style>
+/* VOICE: a small ritual between fellow fans; honest about what it can and cannot tell
+   IDEA: A and B, two circles, and the space between them (attention landing)
+   PICTURE: Venn on the start screen; on the result, the eight bars and a landing strip
+   COLOUR and TYPE: warm paper, plum ink, one rose accent; system serif titles, system sans body
+   LAYOUT: one calm column, max 640px, 48px targets */
+:root{--bg:#fbf6f2;--card:#fff;--ink:#2a1d27;--soft:#6f5d69;--line:#e7dbe0;--rose:#c8385f;--rosebg:#fbe6ec;--plum:#5b3a68;--plumbg:#efe6f3;--good:#2f7d5d;--goodbg:#eaf5ef}
+@media (prefers-color-scheme:dark){:root{--bg:#191316;--card:#241c20;--ink:#f3e9ee;--soft:#bba9b3;--line:#3a2e35;--rose:#ff7a9c;--rosebg:#3d2029;--plum:#c9a4dc;--plumbg:#2f2338;--good:#6fd3a4;--goodbg:#1e332a}}
+:root[data-theme=light]{--bg:#fbf6f2;--card:#fff;--ink:#2a1d27;--soft:#6f5d69;--line:#e7dbe0;--rose:#c8385f;--rosebg:#fbe6ec;--plum:#5b3a68;--plumbg:#efe6f3;--good:#2f7d5d;--goodbg:#eaf5ef}
+:root[data-theme=dark]{--bg:#191316;--card:#241c20;--ink:#f3e9ee;--soft:#bba9b3;--line:#3a2e35;--rose:#ff7a9c;--rosebg:#3d2029;--plum:#c9a4dc;--plumbg:#2f2338;--good:#6fd3a4;--goodbg:#1e332a}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,"PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;overflow-x:clip;-webkit-text-size-adjust:100%}
+main{max-width:640px;margin:0 auto;padding:clamp(20px,4vw,48px) 16px 64px}
+h1{font:900 clamp(32px,7vw,46px)/1.08 "Songti SC","Noto Serif SC",Georgia,serif;margin:0 0 10px;text-wrap:balance}
+.serif{font-family:"Songti SC","Noto Serif SC",Georgia,serif}
+.lead{color:var(--soft);margin:0 0 14px}
+.venn{display:block;width:100%;max-width:420px;height:auto;margin:6px auto 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+label.f{display:block;font-size:14px;color:var(--soft);margin:0 0 6px}
+input{width:100%;font:16px inherit;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+input:focus,button:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.chip{font:14px inherit;padding:8px 12px;min-height:40px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.chip.on{border-color:var(--plum);background:var(--plumbg);color:var(--plum)}
+ul.notes{list-style:none;padding:0;margin:0 0 18px;color:var(--soft);font-size:14px}
+ul.notes li{padding:3px 0}
+.btn{font:500 16px inherit;min-height:46px;padding:10px 20px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.btn.main{background:var(--rose);border-color:var(--rose);color:#fff}
+.bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin:0 0 16px}
+.bar i{display:block;height:100%;background:var(--rose);transition:width .3s}
+.sec{background:var(--plumbg);color:var(--plum);border-radius:12px;padding:12px 14px;margin:0 0 16px;font-size:14px}
+.sec b{display:block;font-weight:500;margin-bottom:2px}
+.meta{font-size:13px;color:var(--soft);margin:0 0 8px}
+.q{font:600 clamp(19px,4.2vw,22px)/1.5 "Songti SC","Noto Serif SC",Georgia,serif;margin:0 0 18px}
+.opt{display:block;width:100%;text-align:left;font:16px/1.55 inherit;min-height:48px;padding:12px 14px;margin:0 0 10px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);cursor:pointer}
+.opt.base{color:var(--soft);border-style:dashed}
+.opt.p1{border:2px solid var(--rose);background:var(--rosebg);color:var(--ink)}
+.opt.p2{border:2px dashed var(--rose)}
+.opt .tag{float:right;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--rose);color:#fff;margin-left:8px}
+.opt.p2 .tag{background:transparent;color:var(--rose);border:1px solid var(--rose)}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:6px}
+.err{color:var(--rose);font-size:14px;min-height:22px;margin:4px 0}
+.res .name{font:900 clamp(36px,8.5vw,52px)/1.1 "Songti SC","Noto Serif SC",Georgia,serif;margin:8px 0 6px;text-align:center}
+.res .nick{color:var(--soft);margin:0 0 10px;text-align:center}
+.pills{text-align:center}
+.pill{display:inline-block;font-size:13px;padding:3px 12px;border-radius:999px;background:var(--plumbg);color:var(--plum);margin:0 4px 10px}
+.pill.hi{background:var(--goodbg);color:var(--good)}
+.res .line{font:600 19px/1.5 "Songti SC","Noto Serif SC",Georgia,serif;margin:0 0 10px;text-align:center}
+.small{font-size:13px;color:var(--soft);line-height:1.6}
+.h{font-size:14px;font-weight:600;color:var(--ink);margin:20px 0 8px}
+.note{background:var(--plumbg);border-radius:10px;padding:10px 13px;margin:10px 0;font-size:13px;color:var(--plum)}
+.dims{display:grid;gap:7px;margin:0 0 6px}
+.dim{display:grid;grid-template-columns:68px 1fr 30px;gap:8px;align-items:center;font-size:13px}
+.dim .dn{color:var(--soft);white-space:nowrap}
+.dim.dom .dn{color:var(--rose);font-weight:700}
+.dim.aux .dn{color:var(--plum);font-weight:700}
+.dt{height:8px;background:var(--line);border-radius:6px;overflow:hidden}
+.dt i{display:block;height:100%;background:var(--soft);opacity:.45;border-radius:6px}
+.dim.dom .dt i{background:var(--rose);opacity:1}
+.dim.aux .dt i{background:var(--plum);opacity:.85}
+.dim.peak .dn{color:#b7791f;font-weight:700}
+.dim.peak .dt i{background:#d39a3a;opacity:1}
+.pill.k{background:#fbf0dc;color:#8a5a12}
+.why{border-top:1px solid var(--line);margin:16px 0 0;padding-top:12px}
+.dv{font-variant-numeric:tabular-nums;color:var(--soft);text-align:right}
+.land{display:flex;height:22px;border-radius:8px;overflow:hidden;margin:0 0 6px;border:1px solid var(--line)}
+.land span{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--soft)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+@media(prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+{
+const F=['Ai','Ae','Vi','Ve','Li','Le','Pi','Pe'];
+const FN={Ai:'心动代入',Ae:'心疼守护',Vi:'心里笃定',Ve:'考古求证',Li:'脑补续写',Le:'同担共磕',Pi:'想成为她',Pe:'想读懂她'};
+const AUX={Ai:['Le','Pe'],Ae:['Li','Pi'],Vi:['Le','Pe'],Ve:['Li','Pi'],Li:['Ae','Ve'],Le:['Ai','Vi'],Pi:['Ae','Ve'],Pe:['Ai','Vi']};
+const SCH={A:'情感派',V:'求真派',L:'叙事派',P:'主体派'};
+const MAXP=29;
+const GAP_MIX=12,GAP_HI=20,AUX_WEAK=0.6;
+const T={
+AiLe:['入戏者','CP 体验官','她们谈的恋爱，我也在谈','你磕 CP 时常常跟着心动，糖越甜越投入，也喜欢有同担一起分享这份心动。','如果你其实分得很清戏里戏外，或者更享受一个人默默心动，这个名字可能只说中了一半。'],
+AiPe:['镜中人','小镜子','在她身上看见被爱的自己','你常在她身上看见「被偏爱、被稳稳接住」的样子，这份感觉会让你停下来。','如果你并不想被谁偏爱，只是被「被接住」的画面打动，那更像共鸣，不一定是投射。'],
+AeLi:['撑伞人','晴雨伞','风雨来了，先替她们撑伞','你的第一反应常常是她俩好不好，心里也会悄悄给她们写好一个安稳的结局。','如果你的心疼很克制、从不替正主出头，你可以是安静的守护者，不必是挡在前面的人。'],
+AePi:['点灯人','小夜灯','她们照亮过我，我为她们点灯','她们身上有让你觉得温暖、想守护的光，你也会从她们身上借一点力气。','如果她们并没有在你的低谷出现过，你的守护也可能只是来自单纯的欣赏。'],
+ViLe:['落锁人','小钥匙','锁死了，钥匙我吞了','你对这段关系的感觉很笃定，也愿意和同担一起把这份笃定说出来。','如果你的笃定只在心里、从不和人争，你可能是安静的落锁人，不是圈里喊得最响的那个。'],
+ViPe:['观星者','望远镜','我相信我看见的那道光','你相信自己的直觉，常常从她身上读到一些别人还没说出口的东西。','如果你常常怀疑自己看错了，那说明你的直觉还在和理性商量，这也很正常。'],
+VeLi:['考古学家','小铲子','每一帧都是出土文物','你喜欢回到物料里找线索，再把散碎的细节拼成完整的故事。','考古不等于理性：你翻物料可能只是因为喜欢，不一定是为了证明什么。'],
+VePi:['拾光者','时光胶囊','她们的每个瞬间，我都存着','你会认真留住她们的瞬间，那些存档里也藏着你自己的一段时光。','如果你从不存图，只是记得很多瞬间，你的「存档」也可以在心里。'],
+LiAe:['产粮者','粮仓','现实不给的，我写给她们','现实留下的空白，你常用自己的想象去补上，补的时候还带着一点心疼。','产粮不一定要真的写文剪片，脑子里的故事也算粮。'],
+LiVe:['史官','起居注','这段关系的编年史，由我执笔','你脑子里的故事有来龙去脉，喜欢把它和真实的时间线对上。','如果你对时间线没那么较真，你记下的可能是情绪的编年史，而不是事件的。'],
+LeAi:['狂欢者','磕糖永动机','只要有糖，我就停不下来','对你来说，糖要和同担一起嗑才最甜，一起聊、一起玩梗本身就是快乐。','热闹不等于外向：你也可能只在熟悉的小群里才这样。'],
+LeVi:['传薪者','小火把','一个人磕不够，要大家一起磕','你愿意把这份喜欢分享出去，和大家一起把这段关系讲下去。','如果你不爱组局，只是会向身边一两个人安利，这也算传火。'],
+PeAi:['同行者','成长搭子','她往前走一步，我陪一步','你关注的是她怎么一步步变化，愿意陪她走过每个阶段。','关注她的成长，不代表你不在意这段关系本身。'],
+PeVi:['知音','天气预报','她的每一点变化，我都先看见','你会留意她身上细微的变化，也愿意相信自己读到的那些变化。','看得细不等于看得准，你也会有看走眼的时候，这和类型无关。'],
+PiAe:['向光者','向日葵','她在哪，我就朝向哪','她活出了一部分你想要的样子，你朝着她，也在朝着想成为的自己。','把她当作光，不代表你一定会转唯，也不代表你没有自己的方向。'],
+PiVe:['寻路人','小地图','她走过的路，让我看见自己的路','你会认真看她走过的路，从里面找到一些属于自己的方向。','研究她的路，不等于要照着走，你可能只是在借她确认自己。']
+};
+const OUT={AiLe:['低','跳到下一对正在发糖的 CP'],AiPe:['中高','更关注其中一位，或往梦女方向走'],AeLi:['中','转向更需要被心疼的那一位'],AePi:['中高','更关注其中一位，或安静退坑'],ViLe:['低','长期坚守；信念被打破时容易一下子退坑'],ViPe:['中','从关系向慢慢转向其中一位'],VeLi:['低','留守，成为圈里的资料库'],VePi:['中','成为回望型老粉，或转去给其中一位存档'],LiAe:['低','转向同人或原创创作'],LiVe:['低','这段写完就收笔，再去写下一段'],LeAi:['低','跟着热度去磕下一对'],LeVi:['低','到别的圈子继续组织大家一起磕'],PeAi:['高','转向正在成长的那一位'],PeVi:['高','转向变化更多、更耐读的那一位'],PiAe:['高','她做出背离你期待的选择时，可能关站退坑，去找下一束光'],PiVe:['高','转唯，或脱坑回到自己的生活']};
+const BASE='这题我没什么感觉／不适用我';
+const SITU=[
+{t:'A 生日，B 零点卡点发了条只有她俩看得懂的祝福。',l:['A','B'],o:['被人这样卡点记着生日……光是想想我就幸福死了','宝这一年辛苦了，今天必须被宠成公主','零点卡点还带私人梗，她俩之间有点东西','等下，这个梗出处在哪？我去翻是哪期埋的','她俩私下怎么过生日，我已经脑补到切蛋糕了','发到群里，和同担们把卡点玩成梗','这么会爱人，我也想成为这么用心的人','B 平时几百年不发一条，这次这么用心，她最近是不是变了']},
+{t:'A 拿了个大奖，上台致谢点名了 B。',l:['A','B'],o:['高光时刻被点名的人如果是我……想想就上头','她熬了这么多年，终于被看见了，好想哭','这种场合第一个提她，有点东西','我去把她历年的致谢都扒出来，对比提 B 的方式','镜头没给到，但我已经看见 B 在台下红眼眶了','这段必须和同担们一起再品一遍','看她一路杀到这里，我也想为自己的事拼一把','好奇 B 这时候在想什么，她会怎么接这句']},
+{t:'A 在节目里哭了，B 走过去没说话，就递了张纸巾。',l:['A','B'],o:['这种不说话的陪伴，谁懂，我直接被治愈','心疼死了，还好有 B 在她身边','一句话都不用说就懂，这就是她俩','我去翻正片前一段，看是什么把 A 弄哭的','镜头切走以后 B 肯定还说了什么，我已经写好了','这段得拉着同担一起哭一遍','我也想成为别人难过时知道怎么陪的人','B 本来就不会说漂亮话，这很她']},
+{t:'官宣了：她俩又要合作了！',l:['两人','两人'],o:['又能跟着她们谈一场恋爱了，好耶','求剧组好好对她俩，宣传别乱炒','我就说她俩不会散，锁死','马上扒官宣时间、拍摄地和花絮线索','新角色加本人，我脑子里已经有十个剧情了','过年了同担们！约好一起蹲首播','看她们又一起往前走，我也想在自己的事上再冲一把','好奇这次她们各自能有什么突破']},
+{t:'你挖到一段几年前的老视频，那时候她俩还不熟。',l:['两人','两人'],o:['从陌生到现在，像在重温一段自己的恋爱','那时候都好青涩，好想穿回去抱抱她们','原来从那时候就注定了','挖到宝了，时间线空白补上，日期先标好','前传有了，「初遇」篇可以开写了','必须发出来，和同担们一起考古','看她从那时走到现在，我也想成为那种能一直走下去的人','跟现在比变了好多，这几年她经历了什么']},
+{t:'她俩已经三个月没同框了，各自都在忙。',l:['两人','两人'],o:['有点失落，像谈着谈着对方不回消息了','各自好好的就行，别太累了','不同框又怎样，她俩好着呢','我去扒行程和点赞，看看有没有暗戳戳的互动','没糖就自己产，正好囤粮','圈里太冷清了，得和同担们搞点活动','都在专心搞事业，这种状态我也想要','我更想看看她俩各自这段时间有啥变化']},
+{t:'刚入坑的朋友问你：「她俩到底好磕在哪？」你会脱口而出哪句？',l:['两人','两人'],o:['你看了就懂，那种被偏爱的感觉会传染','她俩一路走得太不容易了，了解了你就会心疼','她俩就是真的，不需要解释','等着，我给你整理一份时间线和必看物料','她俩故事感太强了，随便一个细节都能写成文','来，先进群，一起磕才香','她身上有我想成为的样子，你看看就懂了','你先了解她俩各自是什么样的人，再看她们在一起']},
+{t:'同台活动，B 全程没怎么看 A，散场招呼都没打。',l:['A','B'],o:['心里咯噔一下，好像被冷落的是我','先担心 A，她会不会难过？别让人拿这个做文章','慌什么，镜头外的事我们不知道，好着呢','我去翻其他机位和路透，八成是剪辑的锅','冷战又和好的剧本，已经在我脑子里演完了','和同担们一起把这段解读成「人前避嫌」，越聊越有道理','A 被冷落了还这么得体，我也想有这份体面','B 最近是不是有什么事？她不是会这样的人']},
+{t:'A 在采访里被问到 B，只说了句「她是很好的同事」。',l:['A','A'],o:['有点被泼冷水，感觉我的心意被退回来了','采访场合只能这么说，别逼她了','官方话术罢了，懂的都懂','我去对比她以前怎么形容 B，看用词变没变','「很好的同事」……这句话我能写一万字','已经在群里和同担们玩起「好同事」的梗了','镜头前分寸拿捏得这么好，我也想有这种从容','好奇她说这句时在想什么，她平时是怎么表达感情的']},
+{t:'有人在网上说，B 对 A 的好全是营业。',l:['两人','B'],o:['有点被刺到，像在说我感受到的都是假的','护住她俩，别让这种话传到正主那里','随便说，我信我看到的','时间线甩出来，用细节说话','营业又怎样，我心里的故事不受影响','和同担们一起聊出一个我们自己的说法','就算有营业成分，我也想成为她那种能把关系处理得体面的人','营业和真心可能都有，我更想搞懂 B 这个人']},
+{t:'她俩在同一个城市，却一整个月没有见面，只在线上点了赞。',l:['两人','两人'],o:['有点酸，像自己被轻轻忽略了','各自忙吧，别太累就好','点赞也是在乎，不用天天见面','我去看看点赞的时间点有没有规律','这个月她们各自的生活，我已经脑补出一部平行剧了','群里都在猜她俩怎么了，我也加入一起猜','这种各自忙自己的状态，也是我想有的','我更想知道这一个月她俩各自在经历什么']},
+{t:'网上传出 A 和圈外人恋爱的消息，A 本人没有回应。',l:['B','A'],o:['像失恋了一样，我得缓缓','担心 B 被拉出来比较、被骂','就算是真的，也不影响她俩之间的感情','先别慌，我去核对消息来源和时间线','现实我管不着，我的故事里她俩还在一起','和同担们一起把这件事聊开，想想她们之后会怎样','我一直把她当成想活成的样子，这下得重新想想自己要什么','她也有自己的人生，我想看她接下来怎么走']},
+{t:'她俩合作的节目或合约正式结束，官方说「各自精彩」。',l:['两人','两人'],o:['心里空落落的，像一段感情走到头了','只希望她俩以后都顺顺利利，别被拉踩','合约结束了，感情又没结束','按时间把散落的物料归档','现实散场了，故事在我这儿还能继续','想和同担们办个告别会','她们各自往前走的姿态，也是我想活成的样子','想看她俩各自接下来会走到哪']}
+];
+const EGG={t:'A：我今天不开心￣へ￣<br>B：要不要吃碗蛋炒饭？',o:['如果有人这样照顾我，我应该会很幸福','A 今天不开心，希望 B 能好好哄哄她','她俩之间好像有某种只有彼此懂的默契','等等，她们之前是不是提过蛋炒饭？我得翻翻旧物料','已经开始脑补 B 做好饭、端到 A 面前的画面了','这是什么神仙互动！必须拉同担们一起品品','我也想成为 B 这样的人，记得别人的喜好，知道怎么接住别人的情绪','B 平时是怎么表达关心的？她为什么会这样回应 A？'],base:'就是问吃不吃饭吧，没想太多',w:0};
+const PAIR=[
+{a:['磕 CP 的时候，我更像在替自己谈恋爱',{dir:'Ai'}],b:['磕 CP 的时候，我更像在操心她俩过得好不好',{dir:'Ae'}]},
+{a:['我磕的是感觉，对了就是对了',{dir:'Vi'}],b:['我磕的是证据，有图有真相',{dir:'Ve'}]},
+{a:['我更爱一个人默默脑补',{dir:'Li'}],b:['我更爱和同担们一起玩梗',{dir:'Le'}]},
+{a:['我在她身上看到我想成为的样子',{dir:'Pi'}],b:['我想搞懂她本来是什么样的人',{dir:'Pe'}]},
+{a:['磕得开心最重要',{axis:'A'}],b:['磕得明白最重要',{axis:'V'}]},
+{a:['我更在意她俩之间会发生什么',{axis:'L'}],b:['我更在意她俩各自是什么样的人',{axis:'P'}]},
+{a:['她俩的糖，就是我的糖',{dir:'Ai'}],b:['她俩开心就好，我怎样都行',{dir:'Ae'}]},
+{a:['被说是假的，我心如止水',{dir:'Vi'}],b:['被说是假的，我会直接甩证据',{dir:'Ve'}]},
+{a:['一个人看物料就很满足',{dir:'Li'}],b:['没人一起磕，就少了一半快乐',{dir:'Le'}]},
+{a:['她的选择会影响我怎么看自己',{dir:'Pi'}],b:['她的选择是她的，我只是好奇为什么',{dir:'Pe'}]},
+{a:['吃到一口糖，我会反复回味那个感觉',{axis:'A'}],b:['吃到一口糖，我会琢磨它说明了什么',{axis:'V'}]},
+{a:['我爱想象她俩的以后',{axis:'L'}],b:['我爱观察她俩的现在',{axis:'P'}]},
+{a:['刷到一个很戳的片段，我更想先在心里补完那个画面',{dir:'Li'}],b:['刷到一个很戳的片段，我更想马上发到群里看大家怎么磕',{dir:'Le'}]},
+{a:['我更好奇她怎么变成了现在这样的人',{dir:'Pe'}],b:['我更想活成她那样的人',{dir:'Pi'}]},
+{a:['看到她俩被骂，我先难过',{dir:'Ai'}],b:['看到她俩被骂，我先想护着',{dir:'Ae'}]},
+{a:['我磕的点说不清，也不需要说清',{dir:'Vi'}],b:['我磕的每个点，都能给你标出处',{dir:'Ve'}]}
+];
+const MOD=[
+{k:'unit',t:'这对是你现在最投入的一对吗？',o:['是，就是她俩','不是，我同时在磕好几对','以前很投入，现在不怎么磕了','我其实不怎么磕 CP，来玩的']},
+{k:'state',t:'最近一个月，这对 CP 有没有发生让你情绪起伏很大的事？',o:['有','没有','说不清']},
+{k:'frame',t:'你看她俩时，最像在看哪种关系？',o:['恋人','母女／长幼','姐妹／同盟','知己／灵魂伴侣','酷儿柏拉图：很重要，但不需要被定义','搭档／并肩','对手／竞争中仍选择彼此','引路人／知遇','旧人／曾经很好，现在回不去']},
+{k:'time',t:'一段 CP 最让你满足的是？',o:['一个确定的结局：锁死、官宣、和好','关系一直在变、一直在发生','过去那段最好的时光，和它今天的回响']},
+{k:'stake',t:'你心里最希望她们之间「真的是」哪一层？',o:['演得好就够了','互动是真的','彼此有真感情','就是我认定的那种关系','只属于彼此']}
+];
+const VENN=`<svg class="venn" viewBox="0 0 420 220" role="img" aria-label="A 和 B 两个圆，中间重叠的部分是她们之间"><circle cx="150" cy="110" r="96" fill="var(--rosebg)" stroke="var(--rose)" stroke-width="2"/><circle cx="270" cy="110" r="96" fill="var(--plumbg)" stroke="var(--plum)" stroke-width="2" fill-opacity=".75"/><path d="M210 35a96 96 0 0 1 0 150a96 96 0 0 1 0-150z" fill="var(--rose)" fill-opacity=".22"/><text x="105" y="118" font-size="30" font-family="Songti SC,serif" font-weight="900" fill="var(--rose)">A</text><text x="296" y="118" font-size="30" font-family="Songti SC,serif" font-weight="900" fill="var(--plum)">B</text><text x="210" y="116" font-size="15" text-anchor="middle" fill="var(--ink)">之间</text></svg>`;
+const LANDC={'我':'var(--rose)','她们之间':'var(--plum)','某一方':'#d39a3a','人群':'var(--good)'};
+
+let NA='A',NB='B',CP='';let PS=new Set();
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nm=t=>t.replace(/(^|[^A-Za-z])([AB])(?=[^A-Za-z]|$)/g,(m,p,x)=>p+(x==='A'?NA:NB));
+const sh=a=>{for(let x=a.length-1;x>0;x--){const y=Math.floor(Math.random()*(x+1));[a[x],a[y]]=[a[y],a[x]];}return a;};
+const KEY='kexue8_v3';
+const store={get(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){return null}},set(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}},del(){try{localStorage.removeItem(KEY)}catch(e){}}};
+
+const SEC1=['第一部分｜发糖现场','先来点甜的。看完别分析，点你脑子里第一个蹦出来的念头；要是紧跟着又蹦出一个，也点上。实在没感觉，就选「不适用」。'];
+const SEC2=['第二部分｜二选一','两句可能都像你，挑更像平时的你那句，别纠结。'];
+const SEC3=['第三部分｜刀子来了','磕 CP 哪有一直甜的。冷脸、营业论、传闻、散场……都是虚构情境，看看那时候的你。'];
+const SEC4=['第四部分｜再来一轮','快了快了，凭直觉选。'];
+const SEC5=['第五部分｜关于你和这对 CP','这几题不算分，只帮结果读得更准。'];
+let Q=[],A=[],i=-1,FLIPS=[];let lastQ=-1,shownAt=0;
+function build(flips){
+  Q=[];let pk=0;FLIPS=flips||[];
+  const mkS=(s,idx,ex)=>{const ord=sh(s.o.map((_,j)=>j));const b=s.base||BASE;ord.splice(Math.floor(Math.random()*(ord.length+1)),0,-1);return Object.assign({kind:'s',idx,t:s.t,o:s.o,l:s.l,base:b,w:s.w??1,ord},ex||{});};
+  const mkP=(p,ex)=>{let f=FLIPS[pk];if(f===undefined){f=Math.random()<.5;FLIPS[pk]=f;}pk++;const r=f?{a:p.b,b:p.a}:{a:p.a,b:p.b};return Object.assign({kind:p.a[1].dir?'d':'x',a:r.a,b:r.b},ex||{});};
+  SITU.slice(0,7).forEach((s,k)=>Q.push(mkS(s,k,k===0?{sec:SEC1}:null)));
+  PAIR.slice(0,8).forEach((p,k)=>Q.push(mkP(p,k===0?{sec:SEC2}:null)));
+  SITU.slice(7).forEach((s,k)=>Q.push(mkS(s,k+7,k===0?{sec:SEC3,stress:1}:{stress:1})));
+  PAIR.slice(8).forEach((p,k)=>Q.push(mkP(p,k===0?{sec:SEC4}:null)));
+  MOD.forEach((m,k)=>Q.push(Object.assign({kind:m.multi?'m':'o',k:m.k,t:m.t,o:m.o},k===0?{sec:SEC5}:null)));
+  Q.push(mkS(EGG,-1,{fin:1,sec:['压轴题｜一碗蛋炒饭','就两句话。看到这里，你第一反应是？这题不计入类型，是留给你的一面小镜子。']}));
+}
+const app=document.getElementById('app');
+const top=()=>{try{window.scrollTo({top:0});app.scrollIntoView({block:'start'})}catch(e){}};
+const save=()=>store.set({flips:FLIPS,ans:A,i,NA,NB,CP,PS:[...PS]});
+
+function intro(){
+const saved=store.get();
+const canResume=saved&&saved.ans&&saved.i>=0&&saved.flips;
+app.innerHTML=`<h1>磕学八维</h1><p class="lead">同一口糖，有人当场尖叫，有人掏出显微镜，有人连夜产粮，有人只关心正主今天吃没吃好。你磕 CP，到底在磕什么？</p>
+<p class="small" style="margin:-6px 0 12px">这套测试看的是你磕一对 CP 时的 8 种心理偏好（心动代入、心疼守护、心里笃定、考古求证、脑补续写、同担共磕、想成为她、想读懂她），外加你的注意力落在哪里。它不是粉籍鉴定，也不是心理诊断。</p>${VENN}
+${canResume?`<div class="card" style="margin:0 0 14px"><p style="margin:0 0 10px">你上次答到第 ${saved.i+1} 题。</p><div class="row" style="justify-content:flex-start;margin:0"><button class="btn main" id="resume">接着答</button><button class="btn" id="fresh">重新开始</button></div></div>`:''}
+<div class="card"><p style="font-weight:500;margin:0 0 6px">先报一对你正在磕的 CP</p><p class="small" style="margin:0 0 12px">以你现在最投入的一对为准。题目里的 A 和 B 就是她俩，填了名字题目会自动替换；不填也能直接开测。换一对 CP 测出不同结果，是正常的。</p>
+<div class="grid"><div><label class="f" for="cp">CP 名（可选）</label><input id="cp" maxlength="12" value="${CP}"></div><div><label class="f" for="na">A 是谁（可选）</label><input id="na" maxlength="8" value="${NA==='A'?'':NA}"></div><div><label class="f" for="nb">B 是谁（可选）</label><input id="nb" maxlength="8" value="${NB==='B'?'':NB}"></div></div>
+<ul class="notes"><li>35 题，约 10 分钟，进度会自动保存在你的浏览器里</li><li>凭第一反应，选你真会那么想的，别选「理智粉应该选」的</li><li>磕法不分高低，怎么磕都是磕</li><li>题里有冷淡、传闻、散场等虚构情境，不舒服可以随时停下</li><li>如果你未满 16 岁，结果请当作好玩的参考，别拿来定义自己</li><li>名字和选择只存在你的浏览器里，不会上传</li></ul>
+<button class="btn main" id="go" style="width:100%">开测</button></div>`;
+document.getElementById('go').onclick=()=>{const a=document.getElementById('na').value.trim(),b=document.getElementById('nb').value.trim();CP=esc(document.getElementById('cp').value.trim());NA=a?esc(a):'A';NB=b?esc(b):'B';build();A=Q.map(()=>({p1:null,p2:null}));i=0;save();render();top();};
+if(canResume){
+  document.getElementById('resume').onclick=()=>{build(saved.flips);A=Q.map((_,k)=>saved.ans[k]||{p1:null,p2:null});NA=saved.NA||'A';NB=saved.NB||'B';CP=saved.CP||'';PS=new Set(saved.PS||[]);i=Math.min(saved.i,Q.length-1);render();top();};
+  document.getElementById('fresh').onclick=()=>{store.del();intro();};
+}
+}
+
+function render(){
+const q=Q[i],a=A[i];
+const pct=Math.round((i+1)/Q.length*100);
+let hint=q.kind==='s'?'第一反应必选，第二反应可选':q.kind==='m'?'可多选，也可以不选':q.kind==='o'?'选一个最接近的':'哪句更像你？选好后点「下一题」';
+let h=`<div class="bar"><i style="width:${pct}%"></i></div>${q.sec?`<div class="sec"><b>${q.sec[0]}</b>${q.sec[1]}</div>`:''}<p class="meta">第 ${i+1} / ${Q.length} 题　${hint}</p>`;
+if(q.kind==='s'){
+  h+=`<p class="q">${nm(q.t)}</p>`;
+  q.ord.forEach(j=>{const txt=j<0?q.base:nm(q.o[j]);const c=(a.p1===j?'p1':a.p2===j?'p2':'')+(j<0?' base':'');const tg=a.p1===j?'<span class="tag">第一</span>':a.p2===j?'<span class="tag">第二</span>':'';h+=`<button class="opt ${c}" data-j="${j}">${tg}${txt}</button>`;});
+}else if(q.kind==='d'||q.kind==='x'){
+  h+=`<p class="q">哪句更像你？</p>`;
+  ['a','b'].forEach(k=>{h+=`<button class="opt ${a.p1===k?'p1':''}" data-j="${k}">${q[k][0]}</button>`;});
+}else{
+  h+=`<p class="q">${q.t}</p>`;
+  const sel=q.kind==='m'?(a.p1||[]):[a.p1];
+  q.o.forEach((t,j)=>{h+=`<button class="opt ${sel.includes(j)?'p1':''}" data-j="${j}">${t}</button>`;});
+}
+h+=`<p class="err" id="err" role="status"></p><div class="nav"><button class="btn" id="prev">${i>0?'上一题':'返回'}</button><button class="btn main" id="next">${i===Q.length-1?'看鉴定结果':'下一题'}</button></div>`;
+app.innerHTML=h;
+if(lastQ!==i){lastQ=i;shownAt=Date.now();}
+app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(Date.now()-shownAt<300)return;let j=b.dataset.j;document.getElementById('err').textContent='';
+if(q.kind==='d'||q.kind==='x'){a.p1=j;save();render();return;}
+j=+j;
+if(q.kind==='m'){const s=new Set(a.p1||[]);s.has(j)?s.delete(j):s.add(j);a.p1=[...s];save();render();return;}
+if(q.kind==='o'){a.p1=j;save();render();return;}
+if(a.p1===j){a.p1=a.p2;a.p2=null;}
+else if(a.p2===j){a.p2=null;}
+else if(a.p1===null){a.p1=j;}
+else if(j>=0&&a.p1>=0){a.p2=j;}
+else{a.p1=j;a.p2=null;}
+save();render();});
+document.getElementById('prev').onclick=()=>{if(i>0){i--;save();render();}else intro();top();};
+document.getElementById('next').onclick=()=>{const need=q.kind!=='m';if(need&&(a.p1===null||a.p1===undefined)){document.getElementById('err').textContent=q.kind==='s'?'先点一个第一反应':'先选一个';return;}if(i<Q.length-1){i++;save();render();}else result();top();};
+}
+
+function compute(){
+  const raw={},wins={},sweet={},stress={};F.forEach(f=>{raw[f]=0;wins[f]=0;sweet[f]=0;stress[f]=0;});
+  const ax={A:0,V:0,L:0,P:0};const land={'我':0,'她们之间':0,'某一方':0,'人群':0};const who={A:0,B:0,'两人':0};
+  let na=0,sweetN=0,stressN=0;const mod={};
+  Q.forEach((q,k)=>{
+    const a=A[k];
+    if(q.kind==='s'){
+      if(q.w===0)return;
+      if(a.p1===-1){na++;return;}
+      const add=(j,w)=>{const f=F[j];raw[f]+=w;
+        const L=(f==='Ai'||f==='Pi')?'我':(f==='Le')?'人群':(f==='Ae'||f==='Pe')?'某一方':'她们之间';land[L]+=w;
+        if(f==='Ae')who[q.l[0]]+=w;if(f==='Pe')who[q.l[1]]+=w;};
+      if(a.p1!==null&&a.p1>=0){add(a.p1,2);(q.stress?stress:sweet)[F[a.p1]]++;q.stress?stressN++:sweetN++;}
+      if(a.p2!==null&&a.p2>=0)add(a.p2,1);
+    }else if(q.kind==='d'){if(a.p1){const s=a.p1==='a'?q.a:q.b;raw[s[1].dir]++;wins[s[1].dir]++;}}
+    else if(q.kind==='x'){if(a.p1){const s=a.p1==='a'?q.a:q.b;ax[s[1].axis]++;}}
+    else{mod[q.k]=a.p1;}
+  });
+  const norm={};F.forEach(f=>norm[f]=raw[f]/MAXP*100);
+  return {raw,norm,wins,ax,land,who,na,mod,sweet,stress,sweetN,stressN};
+}
+function bestAux(norm,wins,d){const [x1,x2]=AUX[d];if(Math.abs(norm[x1]-norm[x2])>=0.01)return {aux:norm[x1]>norm[x2]?x1:x2,tie:false};if(wins[x1]!==wins[x2])return {aux:wins[x1]>wins[x2]?x1:x2,tie:false};return {aux:x1,tie:true};}
+function classify(c){
+  const {norm,wins}=c;
+  const rank=[...F].sort((x,y)=>(norm[y]-norm[x])||(wins[y]-wins[x])||0);
+  const [d1,d2]=rank;const gap=norm[d1]-norm[d2];
+  const {aux,tie:auxTie}=bestAux(norm,wins,d1);
+  const alt=d2+bestAux(norm,wins,d2).aux;
+  let level=gap>=GAP_HI?2:gap>=GAP_MIX?1:0;
+  if(c.mod.state===0)level=Math.max(0,level-1);
+  if(c.na>=3)level=Math.max(0,level-1);
+  const conf=['低','中','高'][level];
+  const auxWeak=norm[aux]<norm[d1]*AUX_WEAK;
+  const mixed=gap<GAP_MIX;
+  const top3=rank.slice(0,3);const dual=[];
+  [['Ai','Ae','感'],['Vi','Ve','证'],['Li','Le','叙'],['Pi','Pe','主']].forEach(([x,y,n])=>{if(top3.includes(x)&&top3.includes(y))dual.push(n);});
+  let pressure=null;
+  if(c.sweetN&&c.stressN){let best=null,bd=0;F.forEach(f=>{const d=c.stress[f]/c.stressN-c.sweet[f]/c.sweetN;if(d>bd){bd=d;best=f;}});if(best&&bd>=0.33&&best!==d1)pressure=best;}
+  let best=null,bestSum=-1;Object.keys(T).forEach(k=>{const x=k.slice(0,2),y=k.slice(2);const sm=norm[x]+norm[y];if(sm>bestSum+0.01||(Math.abs(sm-bestSum)<=0.01&&best&&norm[x]>norm[best.slice(0,2)])){bestSum=sm;best=k;}});
+  const ruleSum=norm[d1]+norm[aux];
+  const sameDir=d2[1]===d1[1]&&!AUX[d1].includes(d2);
+  const useC=auxWeak&&gap>=0.01&&best!==d1+aux&&bestSum>ruleSum+0.01;
+  return {dom:d1,d2,aux,auxTie,code:d1+aux,alt,gap,conf,auxWeak,mixed,dual,rank,pressure,best,bestSum,ruleSum,sameDir,useC};
+}
+
+function result(){
+const c=compute();const r=classify(c);const lead=r.useC?r.best.slice(0,2):r.dom;const t=T[r.useC?r.best:r.code];
+const big=lead[1]==='i'?'内磕':'外磕';const sch=SCH[lead[0]];
+const ea=A[Q.length-1].p1;const egg=ea===null||ea<0?'就是问吃不吃饭吧':nm(EGG.o[ea]);
+const notCP=c.mod.unit===3||c.na>=6;
+let head,sub,line,desc;
+if(r.gap<0.01){head='混合型';sub='「'+FN[r.dom]+'」与「'+FN[r.d2]+'」并列';line='你不在任何一个格子里，你在两者之间';desc='你的两个功能一样强。这不是没测准，而是你磕的时候本来就同时需要两样东西。';}
+else if(r.useC){const bt=T[r.best];head=bt[0];sub=bt[1]+'　<span style="font-family:ui-monospace,monospace">'+r.best+'</span>　'+FN[r.best.slice(0,2)]+' + '+FN[r.best.slice(2)];line='「'+bt[2]+'」';desc=bt[3];}
+else if(r.auxWeak){head='待显影 · '+FN[r.dom];sub='主导是「'+FN[r.dom]+'」，辅助功能还没成形';line='「'+FN[r.dom]+'」是你最先被击中的地方';desc='你的主导功能很清楚，但按现在的组合规则，能给它当辅助的两个功能分数都偏低。这往往说明你的第二强功能和主导同一方向，规则暂时装不下它，看看下面的八维得分和第二读法会更准。';}
+else{head=t[0];sub=t[1]+'　<span style="font-family:ui-monospace,monospace">'+r.code+'</span>';line='「'+t[2]+'」';desc=t[3];}
+let dims='<div class="dims">';
+r.rank.forEach(f=>{const w=Math.max(2,Math.round(c.norm[f]));const cls=r.useC?(f===r.best.slice(0,2)?'dom':f===r.best.slice(2)?'aux':f===r.dom?'peak':''):(f===r.dom?'dom':(f===r.aux?'aux':''));dims+=`<div class="dim ${cls}"><span class="dn">${FN[f]}</span><div class="dt"><i style="width:${w}%"></i></div><span class="dv">${Math.round(c.norm[f])}</span></div>`;});
+dims+='</div>';
+const lt=Object.values(c.land).reduce((s,v)=>s+v,0)||1;
+let landBar='<div class="land">'+Object.entries(c.land).map(([k,v])=>`<span style="width:${v/lt*100}%;background:${LANDC[k]}" title="${k}"></span>`).join('')+'</div><div class="legend">'+Object.entries(c.land).map(([k,v])=>`<span><i style="background:${LANDC[k]}"></i>${k} ${Math.round(v/lt*100)}%</span>`).join('')+'</div>';
+const topLand=Object.entries(c.land).sort((x,y)=>y[1]-x[1])[0][0];
+const LANDTXT={'我':'你常把自己放进这段关系里感受，或在她身上照见自己。','她们之间':'你的注意力大多落在「她俩之间」：关系本身的真假、来龙去脉和故事。','某一方':'你的注意力常落在她们各自身上：她好不好、她是什么样的人。','人群':'你的磕常常发生在人群里：和同担一起，糖才算完整。'};
+let lean='';const wa=c.who.A,wb=c.who.B;
+if(Math.max(wa,wb)>=4&&Math.max(wa,wb)>=2*Math.min(wa,wb)){const x=wa>wb?NA:NB;lean=`<div class="note">在「关注某一方」的那些时刻，你明显更常看向 ${x}。这是唯粉倾向的线索之一，但只是线索：很多 CP 粉也会偏爱其中一位。</div>`;}
+let derive='';
+if(!r.useC&&!r.auxWeak&&r.gap>=0.01){const [x1,x2]=AUX[r.dom];derive=`<div class="why"><p class="h" style="margin-top:0">八维得分怎么变成你的磕型</p><p class="small" style="color:var(--ink)">① 主导：八维里最高的是「${FN[r.dom]}」（${Math.round(c.norm[r.dom])}）。<br>② 辅助：规则要求辅助来自另一组、方向相反，所以只能在「${FN[x1]}」（${Math.round(c.norm[x1])}）和「${FN[x2]}」（${Math.round(c.norm[x2])}）里选，取高的「${FN[r.aux]}」。<br>③ ${FN[r.dom]} + ${FN[r.aux]} = ${t[0]}（${r.code}）。</p>${r.sameDir?`<p class="small">你的第二强功能「${FN[r.d2]}」和「${FN[r.dom]}」方向相同，规则不让它当辅助，所以它没进类型名。</p>`:''}</div>`;}
+const ot=OUT[r.useC?r.best:r.code];let outlook='';
+if(ot&&!(r.auxWeak&&!r.useC)){const lw=Math.max(c.who.A,c.who.B)>=3&&c.who.A!==c.who.B?(c.who.A>c.who.B?NA:NB):'';const dream=(r.rank.slice(0,2).includes('Ai'))&&c.land['我']/lt>=0.3;
+outlook=`<div class="why"><p class="h" style="margin-top:0">你之后可能往哪走（推测）</p><p class="small" style="color:var(--ink)">转唯的可能：${ot[0]}。这种磕法常见的去向是：${ot[1]}。${lw?`如果真的转唯，从你的作答看，更可能看向 ${lw}。`:''}${dream?'你常把自己放进关系里感受，也可能慢慢往梦女方向走。':''}</p><p class="small">这是根据类型和你的作答推出来的倾向，不是预言。很多人一直都是 CP 粉，换了一对也照样磕。</p></div>`;}
+let notes='';
+if(notCP)notes+=`<div class="note">你选了较多「不适用」或说自己不太磕 CP，所以下面的结果只作好玩的参考。这套题主要是给正在磕一对真人 CP 的人设计的。</div>`;
+if(r.mixed&&r.gap>=0.01)notes+=`<div class="note">你的「${FN[r.dom]}」和「${FN[r.d2]}」只差 ${Math.round(r.gap)} 分，属于混合型：另一种读法是「${T[r.alt][0]}」。两个都可以是你。</div>`;
+if(r.auxTie)notes+=`<div class="note">你的两个辅助方向（${FN[AUX[r.dom][0]]}、${FN[AUX[r.dom][1]]}）几乎一样强，类型名里的辅助只是暂取其一。</div>`;
+if(r.dual.length)notes+=`<div class="note">你的「${r.dual.join('」「')}」两端都强：同一件事，你既会向内感受，也会向外观察。这是内在张力，不是矛盾。</div>`;
+if(r.pressure)notes+=`<div class="note">一到冷淡、传闻、散场这类时刻，你更常冒出「${FN[r.pressure]}」的念头，和平时不太一样。这是你在压力下的反应线索，不代表你的类型变了。</div>`;
+if(c.mod.state===0)notes+=`<div class="note">你说最近这对 CP 发生了让你情绪起伏很大的事，结果可能更多反映你这阵子的状态。过一段时间再测，可能会不一样。</div>`;
+const typeName=r.useC?(t[0]+' · '+t[1]+'（同方向双核）'):r.gap<0.01?('混合型（'+FN[r.dom]+'／'+FN[r.d2]+'）'):(r.auxWeak?head:(t[0]+' · '+t[1]));
+const plain=s=>s.replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+const share=plain(`${CP?'磕「'+CP+'」的我':'我'}在「磕学八维」的主要读法是：${typeName}（${big} · ${sch} · 把握${r.conf}）\n${line}\n八维前三：${r.rank.slice(0,3).map(f=>FN[f]+Math.round(c.norm[f])).join(' / ')}\n注意力最常落在：${topLand}\n看到蛋炒饭，我的第一反应是：${egg}\n——一种自我探索的读法，不是心理诊断。`);
+app.innerHTML=`<div class="card res">
+<p class="small" style="margin:0;text-align:center">鉴定完毕，${CP?'磕「'+CP+'」时的你，主要读法是':'你磕这对 CP 时的主要读法是'}</p>
+<p class="name">${head}</p><p class="nick">${sub}</p>
+<div class="pills"><span class="pill">${big}</span><span class="pill">${sch}</span><span class="pill ${r.conf==='高'?'hi':''}">结果把握：${r.conf}</span>${r.useC||r.sameDir?'<span class="pill k">同方向双核</span>':''}</div>
+<p class="line">${line}</p><p style="margin:0">${desc}</p>
+${(r.useC||!r.auxWeak)&&r.gap>=0.01?`<p class="small" style="margin:10px 0 0">你可能不完全符合的地方：${t[4]}</p>`:''}
+<p class="h">你的八维得分（0–100）</p>${dims}${r.useC?`<p class="small" style="margin:4px 0 0">橙色：单项最高　红、紫：构成类型名的一对</p><div class="why"><p class="h" style="margin-top:0">为什么不是「${FN[r.dom]}」打头</p><p class="small" style="color:var(--ink)">你单项最高的是${FN[r.dom]}（${Math.round(c.norm[r.dom])}），按原规则它是主导。但能给它当辅助的${FN[AUX[r.dom][0]]}（${Math.round(c.norm[AUX[r.dom][0]])}）、${FN[AUX[r.dom][1]]}（${Math.round(c.norm[AUX[r.dom][1]])}）都偏低${r.sameDir?`，而你真正的第二强功能${FN[r.d2]}（${Math.round(c.norm[r.d2])}）和${FN[r.dom]}方向相同，规则装不下它`:''}。所以按原规则，你是「待显影 · ${FN[r.dom]}」。</p><p class="small" style="color:var(--ink)">换个角度看，你最强的一对搭配是「${FN[r.best.slice(0,2)]} + ${FN[r.best.slice(2)]}」（${Math.round(r.bestSum)}），比原规则的「${FN[r.dom]} + ${FN[r.aux]}」（${Math.round(r.ruleSum)}）更高，所以主标题用${T[r.best][0]}。「${FN[r.dom]}」是你最常用的方式。</p></div>`:''}
+${r.useC||r.mixed?'':`<p class="small" style="margin:6px 0 0">第二接近的读法：${T[r.alt][0]}（${T[r.alt][1]}）</p>`}
+${derive}<p class="h">你的注意力落在哪里</p>${landBar}<p class="small" style="margin:8px 0 0">${LANDTXT[topLand]}</p>${lean}
+${notes}${outlook}
+<p class="small" style="margin:16px 0 0">看到蛋炒饭，你的第一反应是：${egg}</p>
+<p class="small" style="margin:14px 0 0">这是你磕这一对 CP 时的一种读法，测的是习惯，不是能力，也不评价哪种磕法更高明，更不对真人关系做任何判断。结果把握低，说明你几种偏好很接近，换个时间或换一对 CP 再测，可能会不同。</p>
+</div>
+<p class="err" id="cpm" style="text-align:center" role="status"></p>
+<div class="card" style="margin-top:14px"><p style="font-weight:500;margin:0 0 4px">帮作者一个小忙</p><p class="small" style="margin:0 0 10px">这个结果有多像你？选完后点「复制给作者的数据」，把复制的内容发给邀请你来测的人。数据不含你的名字。</p><div class="chips" id="rate">${[1,2,3,4,5].map(n=>`<button class="chip" data-n="${n}">${n}${n===1?' 完全不像':n===5?' 非常像':''}</button>`).join('')}</div><button class="btn" id="data" style="width:100%">复制给作者的数据</button><p class="err" id="dm" role="status"></p></div>
+<div class="row"><button class="btn main" id="copy">复制分享文案</button><button class="btn" id="again">重新测</button></div>`;
+let rate=null;document.querySelectorAll('#rate .chip').forEach(b=>b.onclick=()=>{rate=+b.dataset.n;document.querySelectorAll('#rate .chip').forEach(x=>x.classList.toggle('on',x===b));});
+const modTxt=MOD.map(m=>{const v=c.mod[m.k];return m.k+'='+(v===undefined||v===null?'-':m.o[v]);}).join('；');
+document.getElementById('data').onclick=()=>{const m=document.getElementById('dm');if(!rate){m.textContent='先选一下像不像你';return;}const d=`【磕学八维v3数据】CP=${plain(CP)||'-'}｜结果=${plain(typeName)}｜规则判定=${r.code}${r.useC?'｜C切换='+r.best:''}｜把握=${r.conf}｜像不像=${rate}/5｜八维=${F.map(f=>FN[f]+Math.round(c.norm[f])).join(',')}｜落点=${Object.entries(c.land).map(([k,v])=>k+Math.round(v/lt*100)).join(',')}｜A/B=${c.who.A}/${c.who.B}｜不适用=${c.na}｜压力=${r.pressure?FN[r.pressure]:'-'}｜${modTxt}｜蛋炒饭=${egg}`;try{navigator.clipboard.writeText(d).then(()=>{m.textContent='已复制，发给邀请你的人就好';},()=>{m.textContent='复制失败，可以截图这一页发过去';});}catch(e){m.textContent='复制失败，可以截图这一页发过去';}};
+document.getElementById('copy').onclick=()=>{const m=document.getElementById('cpm');try{navigator.clipboard.writeText(share).then(()=>{m.textContent='已复制，去发给同担吧';},()=>{m.textContent='复制失败，可以直接截图';});}catch(e){m.textContent='复制失败，可以直接截图';}};
+document.getElementById('again').onclick=()=>{store.del();intro();top();};
+store.del();
+}
+if(typeof window!=='undefined')window.__kx={get Q(){return Q},get A(){return A},set A(v){A=v},build,compute,classify,SITU,PAIR,T,F};
+intro();
+}
+</script>
+</body>
+</html>
